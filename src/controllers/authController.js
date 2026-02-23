@@ -12,8 +12,11 @@ const register = async (req, res) => {
     if (!password || password.length < 6)
       return res.json({ error: "password must be at least 6 characters" });
 
-    const isExist = await User.findOne({ email });
-    if (isExist) return res.json({ error: "email is already taken" });
+    const isEmailExist = await User.findOne({ email });
+    if (isEmailExist) return res.json({ error: "email is already taken" });
+
+    const isNameExist = await User.findOne({ name });
+    if (isNameExist) return res.json({ error: "name is already taken" });
 
     const hashPassword = await bcrypt.hash(password, 10);
 
