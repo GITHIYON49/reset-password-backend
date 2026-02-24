@@ -74,9 +74,6 @@ const forgotPassword = async (req, res) => {
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
       auth: {
         user: process.env.EMAIL,
         pass: process.env.APP_PASSWORD,
@@ -90,11 +87,13 @@ const forgotPassword = async (req, res) => {
       text: `${process.env.FRONT_END_URL}/resetPassword/${user._id}/${token}`,
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    if (process.env.NODE_ENV !== "production") {
-      console.log("Email sent:", info.response);
+    try {
+      await transporter.sendMail(mailOptions);
+      return res.json({ success: true, message: "Email sent successfully" });
+    } catch (error) {
+      console.error("Email error:", error);
+      throw new Error("Email could not be sent");
     }
-    res.json({ success: true, message: "Email sent successfully" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: "Something went wrong" });
