@@ -61,8 +61,11 @@ const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
+
     if (!user) {
-      return res.json({ error: "user is not available" });
+      return res.json({
+        message: "If this email exists, a reset link has been sent.",
+      });
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -72,6 +75,7 @@ const forgotPassword = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.com",
+      port: 465,
       secure: true,
       auth: {
         user: process.env.EMAIL,
@@ -80,31 +84,18 @@ const forgotPassword = async (req, res) => {
     });
 
     const mailOptions = {
-      from: "your_email@gmail.com",
+      from: process.env.EMAIL,
       to: email,
       subject: "Reset Password",
       text: `${process.env.FRONT_END_URL}/resetPassword/${user._id}/${token}`,
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending email: ", error);
-        res.json({
-          error: "Error sending email:",
-        });
-      } else {
-        console.log("Email sent: ", info.response);
-        res.json({
-          success: true,
-          message: "Email sent successfully",
-        });
-      }
-    });
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent:", info.response);
+    res.json({ success: true, message: "Email sent successfully" });
   } catch (err) {
     console.log(err);
-    res.json({
-      error: "something went wrong",
-    });
+    res.status(500).json({ error: "Something went wrong" });
   }
 };
 
