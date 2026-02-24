@@ -91,7 +91,9 @@ const forgotPassword = async (req, res) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", info.response);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Email sent:", info.response);
+    }
     res.json({ success: true, message: "Email sent successfully" });
   } catch (err) {
     console.log(err);
