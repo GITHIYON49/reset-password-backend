@@ -11,7 +11,7 @@ const app = express();
 app.use(express.json());
 
 const allowedOrigins = [
-  "https://resetasswordapp.netlify.app",
+  "https://resetpasswordappone.netlify.app",
   "http://localhost:5173",
 ];
 
